@@ -175,7 +175,7 @@ export default function ChatRoom() {
     const handleScroll = () => {
       const distanceFromBottom =
         chatBox.scrollHeight - chatBox.scrollTop - chatBox.clientHeight;
-      setIsNearBottom(distanceFromBottom < 100);
+      setIsNearBottom(distanceFromBottom < 2);
     };
 
     chatBox.addEventListener("scroll", handleScroll);
