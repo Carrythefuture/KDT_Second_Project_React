@@ -3,6 +3,7 @@ import SockJS from "sockjs-client";
 import { Stomp } from "@stomp/stompjs";
 import { useEffect, useState } from "react";
 import { caxios } from "./config";
+import { ip } from "./config";
 
 const NotificationSocket = () => {
   const [myInfo, setMyInfo] = useState(null);
@@ -20,7 +21,7 @@ const NotificationSocket = () => {
 
     console.log("알림 연결 시도:", myInfo.id);
 
-     const client = Stomp.over(() => new SockJS("http://10.10.55.97/ws-notice"));
+     const client = Stomp.over(() => new SockJS(ip+"/ws-notice"));
     //const client = Stomp.over(() => new SockJS("http://192.168.219.108/ws-notice"));
     
     client.debug = () => {};

@@ -68,40 +68,54 @@ const LeaveModal = ({ open, onClose, refresh, applicant }) => {
     setReferenceList(referenceList);
   };
 
-  const submitVacation = async () => {
-    if (isSubmitting) return;
-    setIsSubmitting(true);
+ const submitVacation = async () => {
+  if (isSubmitting) return;
+  setIsSubmitting(true);
 
-    if (!selectedDates.length) return alert("날짜를 선택해주세요.");
-    if (!vacReason.trim()) return alert("휴가 사유를 반드시 입력해야 합니다.");
-    if (!isCEO && !approverList.length) return alert("결재선을 설정해야 합니다.");
-    if ((vacType === "half_am" || vacType === "half_pm") && selectedDates.length !== 1)
-      return alert("반차는 하루만 선택 가능합니다.");
-    if (vacType !== "half_am" && vacType !== "half_pm" && selectedDates.length > 5)
-      return alert("휴가는 한 번에 최대 5일까지만 신청할 수 있습니다.");
+  if (!selectedDates.length) {
+    setIsSubmitting(false);
+    return alert("날짜를 선택해주세요.");
+  }
+  if (!vacReason.trim()) {
+    setIsSubmitting(false);
+    return alert("휴가 사유를 반드시 입력해야 합니다.");
+  }
+  if (!isCEO && !approverList.length) {
+    setIsSubmitting(false);
+    return alert("결재선을 설정해야 합니다.");
+  }
+  if ((vacType === "half_am" || vacType === "half_pm") && selectedDates.length !== 1) {
+    setIsSubmitting(false);
+    return alert("반차는 하루만 선택 가능합니다.");
+  }
+  if (vacType !== "half_am" && vacType !== "half_pm" && selectedDates.length > 5) {
+    setIsSubmitting(false);
+    return alert("휴가는 한 번에 최대 5일까지만 신청할 수 있습니다.");
+  }
 
-    const payload = {
-      items: selectedDates.map((d) => ({ date: d, type: vacType, reason: vacReason })),
-      approvers: approverList.map((a, idx) => ({ ...a, orderNo: idx + 1 })),
-      references: referenceList,
-    };
-
-    try {
-      await caxios.post("/leave/request", payload);
-    const firstApproverId = approverList[0]?.id || approverList[0]?.member_id || approverList[0]?.userId;
-if (!isCEO && firstApproverId) {
-  sendTestNotice(firstApproverId, "휴가 결재 요청", `${applicant.name}님의 휴가 결재 요청이 도착했습니다.`);
-}
-      alert(isCEO ? "휴가가 정상적으로 등록되었습니다." : "휴가 신청 완료되었습니다.");
-      onClose();
-      refresh();
-    } catch {
-      alert("휴가 신청 실패");
-    } finally {
-      setIsSubmitting(false);
-    }
+  const payload = {
+    items: selectedDates.map((d) => ({ date: d, type: vacType, reason: vacReason })),
+    approvers: approverList.map((a, idx) => ({ ...a, orderNo: idx + 1 })),
+    references: referenceList,
   };
 
+  try {
+    await caxios.post("/leave/request", payload);
+
+    const firstApproverId = approverList[0]?.id || approverList[0]?.member_id || approverList[0]?.userId;
+    if (!isCEO && firstApproverId) {
+      sendTestNotice(firstApproverId, "휴가 결재 요청", `${applicant.name}님의 휴가 결재 요청이 도착했습니다.`);
+    }
+
+    alert(isCEO ? "휴가가 정상적으로 등록되었습니다." : "휴가 신청 완료되었습니다.");
+    onClose();
+    refresh();
+  } catch {
+    alert("휴가 신청 실패");
+  } finally {
+    setIsSubmitting(false); 
+  }
+};
   return (
     <Modal open={open} onCancel={onClose} footer={null} width="75%">
       {!isCEO && (

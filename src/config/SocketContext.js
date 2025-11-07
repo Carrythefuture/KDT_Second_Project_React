@@ -8,7 +8,7 @@ import React, {
 } from "react";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
-
+import { ip } from "./config";
 // 전역 소켓 컨텍스트 생성
 // 리액트앱 전역 데이터 공유 통로 (파이프라인)
 const SocketContext = createContext();
@@ -31,7 +31,7 @@ function SocketProvider({ children }) {
    */
   useEffect(() => {
     // 서버 주소는 환경에 맞게 설정
-    const sock = new SockJS("http://10.10.55.97/ws-chat");
+    const sock = new SockJS(ip+"/ws-chat");
     //const sock = new SockJS("http://192.168.219.108/ws-chat");
     
 
