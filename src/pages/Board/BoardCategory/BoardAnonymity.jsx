@@ -4,8 +4,7 @@ import styles from "./BoardAnnouncement.module.css";
 import { caxios } from "../../../config/config";
 import { useLocation, useNavigate } from "react-router-dom";
 import { StarFilled, StarOutlined } from "@ant-design/icons";
-import { render } from "@testing-library/react";
-import { Border } from "react-bootstrap-icons";
+
 const { Search } = Input;
 
 const BoardAnnouncement = () => {

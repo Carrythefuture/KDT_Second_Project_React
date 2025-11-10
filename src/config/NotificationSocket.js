@@ -21,8 +21,8 @@ const NotificationSocket = () => {
 
     console.log("알림 연결 시도:", myInfo.id);
 
-     const client = Stomp.over(() => new SockJS(ip+"/ws-notice"));
-    //const client = Stomp.over(() => new SockJS("http://192.168.219.108/ws-notice"));
+     const client = Stomp.over(() => new SockJS(ip+"/ws-notice",null,{debug:false,transports: ['websocket']}));
+   
     
     client.debug = () => {};
     client.reconnectDelay = 5000;

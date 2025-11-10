@@ -31,8 +31,8 @@ function SocketProvider({ children }) {
    */
   useEffect(() => {
     // 서버 주소는 환경에 맞게 설정
-    const sock = new SockJS(ip+"/ws-chat");
-    //const sock = new SockJS("http://192.168.219.108/ws-chat");
+    const sock = new SockJS(ip+"/ws-chat",null,{debug:false,transports: ['websocket']});
+ 
     
 
     // STOMP 클라이언트 인스턴스 생성
