@@ -1,9 +1,7 @@
 // src/config/NotificationSocket.jsx
-import SockJS from "sockjs-client";
 import { Stomp } from "@stomp/stompjs";
 import { useEffect, useState } from "react";
 import { caxios } from "./config";
-import { ip } from "./config";
 
 const NotificationSocket = () => {
   const [myInfo, setMyInfo] = useState(null);
@@ -15,42 +13,41 @@ const NotificationSocket = () => {
     });
   }, []);
 
-  //  알림 WebSocket 연결
   useEffect(() => {
     if (!myInfo?.id) return;
 
     console.log("알림 연결 시도:", myInfo.id);
 
-     const client = Stomp.over(() => new SockJS(ip+"/ws-notice",null,{debug:false,transports: ['websocket']}));
-   
-    
-    client.debug = () => {};
+    // 순수 WebSocket 사용
+    const client = Stomp.over(() => new WebSocket(`wss://api.infinity00.world/ws-notice`));
+    // client.debug = () => {};
     client.reconnectDelay = 5000;
 
-    client.connect({}, () => {
-      console.log("✅ 알림 WebSocket 연결됨");
-      console.log("🟢 개인 구독 경로:", `/notice/${myInfo.id}`);
+    // 토큰 가져오기
+    const token = sessionStorage.getItem("token");
 
-      // 개인 알림 구독
-      client.subscribe(`/notice/${myInfo.id}`, (msg) => {
-        const data = JSON.parse(msg.body);
-        console.log("📩 새 알림:", data);
+    // STOMP CONNECT 프레임에서만 토큰 헤더 전달
+    client.connect(
+      { Authorization: `Bearer ${token}` },
+      () => {
+        console.log("✅ 알림 WebSocket 연결됨");
+        console.log("🟢 개인 구독 경로:", `/notice/${myInfo.id}`);
 
-        window.dispatchEvent(
-          new CustomEvent("new-notification", { detail: data })
-        );
-      });
+        // 개인 알림 구독
+        client.subscribe(`/notice/${myInfo.id}`, (msg) => {
+          const data = JSON.parse(msg.body);
+          console.log("📩 새 알림:", data);
+          window.dispatchEvent(new CustomEvent("new-notification", { detail: data }));
+        });
 
-      // 전체 공지 알림 구독
-      client.subscribe(`/notice/all`, (msg) => {
-        const data = JSON.parse(msg.body);
-        console.log("📢 전체 알림:", data);
-
-        window.dispatchEvent(
-          new CustomEvent("new-notification", { detail: data })
-        );
-      });
-    });
+        // 전체 알림 구독
+        client.subscribe(`/notice/all`, (msg) => {
+          const data = JSON.parse(msg.body);
+          console.log("📢 전체 알림:", data);
+          window.dispatchEvent(new CustomEvent("new-notification", { detail: data }));
+        });
+      }
+    );
 
     // 컴포넌트 언마운트 시 연결 해제
     return () => {
