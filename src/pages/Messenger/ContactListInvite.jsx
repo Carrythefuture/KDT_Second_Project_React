@@ -60,7 +60,7 @@ export default function ContactListInvite({ roomId, onClose }) {
     try {
       setLoading(true);
       await caxios.post(`/api/chat/invite?roomId=${roomId}&${memberQuery}`);
-      alert("초대가 완료되었습니다!");
+     
       onClose();
     } catch (err) {
       console.error("초대 실패:", err.response?.data || err.message);

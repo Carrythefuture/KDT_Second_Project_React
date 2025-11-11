@@ -1,6 +1,8 @@
 import axios from "axios";
 
-export const ip = `http://10.5.5.11`;
+export const ip = `https://api.infinity00.world`;
+// export const ip = "http://10.10.55.97";
+
 
 export const caxios = axios.create({
   baseURL: ip

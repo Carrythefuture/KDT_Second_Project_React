@@ -165,42 +165,71 @@ export default function ChatRoom() {
   }, []);
 
   // 스크롤 관리
-  const isInitialScroll = useRef(true);
-  const [isNearBottom, setIsNearBottom] = useState(true);
+  // 스크롤 처음 상태인지 기억하기 위한 Ref
+// useRef는 값이 바뀌어도 컴포넌트가 리렌더링되지 않음
+const isInitialScroll = useRef(true);
 
-  useEffect(() => {
-    const chatBox = document.querySelector(`.${styles.chatBox}`);
-    if (!chatBox) return;
+// 사용자가 현재 스크롤을 거의 맨 아래에 두고 있는지 상태로 관리
+// true면 "거의 바닥에 있음", false면 "위쪽에서 지난 메시지 보고 있음"
+const [isNearBottom, setIsNearBottom] = useState(true);
 
-    const handleScroll = () => {
-      const distanceFromBottom =
-        chatBox.scrollHeight - chatBox.scrollTop - chatBox.clientHeight;
-      setIsNearBottom(distanceFromBottom < 2);
-    };
 
-    chatBox.addEventListener("scroll", handleScroll);
-    return () => chatBox.removeEventListener("scroll", handleScroll);
-  }, []);
 
-  useEffect(() => {
-    if (list.length === 0) return;
-    const last = list[list.length - 1];
+//  스크롤 위치 감지 설정
+useEffect(() => {
+  // 채팅 영역 DOM을 직접 가져옴
+  const chatBox = document.querySelector(`.${styles.chatBox}`);
+  if (!chatBox) return;
 
-    if (isInitialScroll.current) {
-      chatEndRef.current?.scrollIntoView({ behavior: "auto" });
-      isInitialScroll.current = false;
-      return;
-    }
+  // 스크롤 될 때마다 불릴 함수
+  const handleScroll = () => {
+    // (전체 높이 - 현재 스크롤 위치 - 보이는 영역 높이)
+    // = 바닥까지 남은 거리(px)
+    const distanceFromBottom =
+      chatBox.scrollHeight - chatBox.scrollTop - chatBox.clientHeight;
 
-    if (last.sender === userId) {
-      chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-      return;
-    }
+    // 바닥까지 남은 거리가 2px 미만이면 true → 거의 바닥에 있다는 의미
+    setIsNearBottom(distanceFromBottom < 2);
+  };
 
-    if (isNearBottom) {
-      chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [list, userId, isNearBottom]);
+  // 스크롤 이벤트 등록
+  chatBox.addEventListener("scroll", handleScroll);
+
+  // 컴포넌트 unmount 시 이벤트 해제 (메모리 누수 방지)
+  return () => chatBox.removeEventListener("scroll", handleScroll);
+}, []);
+
+
+
+// 새로운 메시지가 들어올 때 스크롤 처리
+
+useEffect(() => {
+  // 메시지가 하나도 없으면 아무것도 안 함
+  if (list.length === 0) return;
+
+  // 가장 최근 메시지
+  const last = list[list.length - 1];
+
+  // 첫 렌더링 시 → 스크롤을 맨 아래로 즉시 이동
+  if (isInitialScroll.current) {
+    chatEndRef.current?.scrollIntoView({ behavior: "auto" });
+    isInitialScroll.current = false; // 첫 스크롤 완료 표시
+    return;
+  }
+
+  // 내가 보낸 메시지라면 → 자동으로 부드럽게 스크롤 내려감
+  if (last.sender === userId) {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    return;
+  }
+
+  // 내가 보낸 메시지가 아니라면,
+  // 사용자가 현재 화면을 "거의 아래"에 둘 때만 자동 스크롤
+  // (채팅 읽느라 위로 올려둔 경우에는 스크롤 건드리지 않음)
+  if (isNearBottom) {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }
+}, [list, userId]);
 
   // 사이드패널
   const openSidePanel = (mode) => {
