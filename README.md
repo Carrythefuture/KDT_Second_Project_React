@@ -6,7 +6,7 @@
 10/16 목요일 : 필수서류 제출
 11/4 월요일 : 프로젝트 발표
 
-### [사이트 도메인](infinity00.wolrd)
+### [사이트 도메인](https://infinity00.world/)
 
 [요구사항 정의서](https://docs.google.com/spreadsheets/d/1dR2JLsKiONp17WkunINeXB5exddlUS2d/edit?gid=816464214#gid=816464214)
 
